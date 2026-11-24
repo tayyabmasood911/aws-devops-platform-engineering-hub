@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-services
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: production-east
+            url: https://kubernetes.default.svc
+          - cluster: staging-east
+            url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: '{{cluster}}-core-workloads'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/tayyabmasood911/aws-devops-platform-engineering-hub.git'
+        targetRevision: HEAD
+        path: k8s/manifests
+      destination:
+        server: '{{url}}'
+        namespace: production
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
